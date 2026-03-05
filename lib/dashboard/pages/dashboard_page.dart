@@ -18,13 +18,14 @@ class DashboardPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Gold Signal"),
+        //PRICE PANEL 
+        title: _pricePanel(ref,candlesAsync,selectedTF),
         centerTitle: true,
       ),
       body: Column(
         children: [
           /// PRICE PANEL
-          _pricePanel(ref, candlesAsync, selectedTF),
+          //_pricePanel(ref, candlesAsync, selectedTF),
 
           /// TREND PANEL
           _trendPanel(signalAsync, bCandlesAsync),
