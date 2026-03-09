@@ -12,15 +12,10 @@ class BinanceFuturesSocketService {
   }) {
     final url =
         'wss://fstream.binance.com/ws/${symbol.toLowerCase()}@kline_$interval';
-    // final url =
-    //     'ws://127.0.0.1:8080';
     _channel = WebSocketChannel.connect(Uri.parse(url));
-
     _channel.stream.listen((message) {
       final data = jsonDecode(message);
-      //print('Received data: $data');
       final k = data['k'];
-
       final candle = Candle(
         time: DateTime.fromMillisecondsSinceEpoch(k['t']),
         open: double.parse(k['o']),
@@ -29,9 +24,6 @@ class BinanceFuturesSocketService {
         close: double.parse(k['c']),
         volume: double.parse(k['v']),
       );
-
-      //final bool isClosed = k['x'];
-
       onUpdate(candle);
     });
   }

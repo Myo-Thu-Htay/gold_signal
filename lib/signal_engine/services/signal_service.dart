@@ -1,6 +1,6 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
 
-import 'package:gold_signal/signal_engine/model/multi_timeframe_model.dart';
+import '../model/multi_timeframe_model.dart';
 
 import '../model/candle.dart';
 import 'volume_filter.dart';
@@ -45,27 +45,24 @@ class SignalService {
 
   int calculateConfidence(MultiTimeFrameModel multiTf) {
     int score = 0;
-    if (isBullish(multiTf.h1)) {
-      score += 2;
-    } else if (isBearish(multiTf.h1)) score -= 2;
-    if (isBullish(multiTf.m15))
-      score += 2;
-    else if (isBearish(multiTf.m15)) score -= 2;
-    if (isBullish(multiTf.m5))
-      score += 2;
-    else if (isBearish(multiTf.m5)) score -= 2;
-    if(rsiBearish(multiTf.m15)) score -= 2;
-    else if(rsiBullish(multiTf.m15)) score += 2;
-    if(_volumeFilter.confirmBullish(multiTf.m15)) score += 2;
-    else if(_volumeFilter.confirmBearish(multiTf.m15)) score -= 2;
-    return score; 
+    if (isBullish(multiTf.h1) || isBearish(multiTf.h1)) score += 3;
+    if (isBullish(multiTf.m15) || isBearish(multiTf.m15)) score += 2;
+    if (isBullish(multiTf.m5) || isBearish(multiTf.m5)) score += 1;
+    if (rsiBullish(multiTf.h1) || rsiBearish(multiTf.h1)) score += 3;
+    if (rsiBullish(multiTf.m15) || rsiBearish(multiTf.m15)) score += 2;
+    if (rsiBullish(multiTf.m5) || rsiBearish(multiTf.m5)) score += 1;
+    if (_volumeFilter.confirmBullish(multiTf.h1)) score += 3;
+    if (_volumeFilter.confirmBullish(multiTf.m15)) score += 2;
+    if (_volumeFilter.confirmBullish(multiTf.m5)) score += 1;
+    
+    return score;
   }
 
   String quality(int score) {
-    if (score >= 8) return 'A+';
-    if (score >= 6) return 'B';
-    if (score >= 4) return 'C';
-    return 'No Trade';
+    if (score >= 15) return "A+";
+    if (score >= 12) return "B";
+    if (score >= 6) return "C";
+    return "Hold";
   }
 
   double calculateSMA(List<Candle> candles, int period) {
@@ -115,8 +112,6 @@ class SignalService {
     //print('Prev Close: $prevClose, Last Close: $lastClose, Prev EMA: $prevEma, Last EMA: $lastEma, Pullback: $pullback');
     return pullback;
   }
-
-  
 
   bool bullishBreak(List<Candle> m5) {
     if (m5.length < 2) return false;
@@ -170,43 +165,45 @@ class SignalService {
   }
 
   List<Candle> calculateMA(List<Candle> candles, int period) {
-      List<Candle> maCandles = [];
-      for (int i = 0; i < candles.length; i++) {
-        if (i >= period - 1) {
-          double sum = 0;
-          for (int j = 0; j < period; j++) {
-            sum += candles[i - j].close;
-          }
-          double maValue = sum / period;
-          maCandles.add(Candle(
-            time: candles[i].time,
-            open: maValue,
-            high: maValue,
-            low: maValue,
-            close: maValue,
-            volume: candles[i].volume,
-          ));
+    List<Candle> maCandles = [];
+    for (int i = 0; i < candles.length; i++) {
+      if (i >= period - 1) {
+        double sum = 0;
+        for (int j = 0; j < period; j++) {
+          sum += candles[i - j].close;
         }
+        double maValue = sum / period;
+        maCandles.add(Candle(
+          time: candles[i].time,
+          open: maValue,
+          high: maValue,
+          low: maValue,
+          close: maValue,
+          volume: candles[i].volume,
+        ));
       }
-      return maCandles;
     }
+    return maCandles;
+  }
 
-  String generateSignal(MultiTimeFrameModel multiTf) {
-    if(multiTf.h1.length < 50 || multiTf.m15.length < 50 || multiTf.m5.length < 50) return 'Hold';
-   bool h1Bull = isBullish(multiTf.h1);
+  String generateSignal(MultiTimeFrameModel multiTf, int score) {
+    if (multiTf.h1.length < 50 ||
+        multiTf.m15.length < 50 ||
+        multiTf.m5.length < 50) return 'Hold';
+    bool h1Bull = isBullish(multiTf.h1);
     bool h1Bear = isBearish(multiTf.h1);
     bool pullBack = isPullBackToEMA50(multiTf.m15);
-    bool breakM5 = bullishBreak(multiTf.m5);
     bool rsiBull = rsiBullish(multiTf.m15);
     bool rsiBear = rsiBearish(multiTf.m15);
-    ///print( 'H1 Bull: $h1Bull, H1 Bear: $h1Bear, PullBack: $pullBack, BreakM5: $breakM5, RSI Bull: $rsiBull, RSI Bear: $rsiBear');
-    if (h1Bull && pullBack && breakM5 && rsiBull) {
+
+    //print( 'H1 Bull: $h1Bull, H1 Bear: $h1Bear, PullBack: $pullBack,  RSI Bull: $rsiBull, RSI Bear: $rsiBear');
+    if (h1Bull && pullBack && score >= 15 && rsiBull) {     
       return 'Strong Buy';
-    } else if (h1Bear && pullBack && breakM5 && rsiBear) {
+    } else if (h1Bear && pullBack && score >= 15 && rsiBear) {   
       return 'Strong Sell';
-    } else if (h1Bull) {
+    } else if (h1Bull && score >= 12) {
       return 'Buy';
-    } else if (h1Bear) {
+    } else if (h1Bear && score >= 12) {
       return 'Sell';
     } else {
       return 'Hold';

@@ -4,7 +4,7 @@ import '../../dashboard/pages/account_page.dart';
 import '../../dashboard/pages/dashboard_page.dart';
 import '../../dashboard/pages/portfolio_page.dart';
 import '../../dashboard/pages/setting_page.dart';
-import '../../dashboard/pages/trade_widget.dart';
+import '../../dashboard/pages/add_trade.dart';
 
 class AppRouter {
   static const String dashboard = '/';
@@ -44,7 +44,7 @@ class _SimpleRouterDelegate extends RouterDelegate<Uri>
         break;
       case AppRouter.addTrade:
         pages.add(const MaterialPage(
-            child: MainPage(selectedIndex: 2, child: AddTradeWidget())));
+            child: MainPage(selectedIndex: 2, child: AddTrade())));
         break;
       case AppRouter.portfolio:
         pages.add(const MaterialPage(

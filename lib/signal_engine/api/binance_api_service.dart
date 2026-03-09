@@ -8,7 +8,7 @@ class BinanceApiService {
   String symbol = TradingConstants.binanceSymbol;
 
   //Fetch XAUUSDT futures candles
-  Future<List<Candle>> getCandles(String interval, {int limit = 500}) async {
+  Future<List<Candle>> getCandles(String interval, {int limit = 1000}) async {
     try {
       final response = await dio.get(baseUrl, queryParameters: {
         'symbol': symbol,

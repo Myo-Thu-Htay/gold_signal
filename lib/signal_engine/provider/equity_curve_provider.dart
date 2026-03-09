@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'account_provider.dart';
 import '../../dashboard/provider/trade_history_provider.dart';
+import 'account_provider.dart';
 
 final equityCurveProvider = Provider<List<double>>((ref) {
   final trades = ref.watch(tradeHistoryProvider);

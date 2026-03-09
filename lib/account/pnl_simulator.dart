@@ -1,5 +1,5 @@
-import '../signal_engine/model/candle.dart';
-import 'trade.dart';
+import '../dashboard/models/trade_model.dart';
+import '../../signal_engine/model/candle.dart';
 
 class PnLSimulator {
   Trade simulate(
@@ -22,7 +22,7 @@ class PnLSimulator {
             lotSize: lotSize,
             isWin: false,
             pnl: -loss,
-            timestamp: candle.time,
+            entryTime: candle.time,
             type: isBuy ? "BUY" : "SELL",
           );
         }
@@ -36,7 +36,7 @@ class PnLSimulator {
             lotSize: lotSize,
             isWin: true,
             pnl: profit,
-            timestamp: candle.time,
+            entryTime: candle.time,
             type: isBuy ? "BUY" : "SELL",
           );
         }
@@ -51,7 +51,7 @@ class PnLSimulator {
             lotSize: lotSize,
             isWin: false,
             pnl: -loss,
-            timestamp: candle.time,
+            entryTime: candle.time,
             type: isBuy ? "BUY" : "SELL",
           );
         }
@@ -65,7 +65,7 @@ class PnLSimulator {
             lotSize: lotSize,
             isWin: true,
             pnl: profit,
-            timestamp: candle.time,
+            entryTime: candle.time,
             type: isBuy ? "BUY" : "SELL",
           );
         }
@@ -81,7 +81,7 @@ class PnLSimulator {
       lotSize: lotSize,
       isWin: false,
       pnl: 0,
-      timestamp: futureCandles.last.time,
+      entryTime: futureCandles.last.time,
       type: isBuy ? "BUY" : "SELL",
     );
   }

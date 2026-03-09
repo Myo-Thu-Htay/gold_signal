@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'trade.dart';
+import '../dashboard/models/trade_model.dart';
+
 
 class PerformanceTracker {
   final List<Trade> trades = [];

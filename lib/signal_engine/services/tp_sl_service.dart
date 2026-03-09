@@ -25,9 +25,10 @@ class TpSlService {
 
     final supports =
         zones.where((z) => z.isSupport && z.price < currentPrice).toList();
-
+    //print('Supports: ${supports.map((s) => s.price).toList()}');
     final resistances =
         zones.where((z) => !z.isSupport && z.price > currentPrice).toList();
+    //print('Resistances: ${resistances.map((r) => r.price).toList()}');
 
     if (isBuy) {
       if (supports.isEmpty || resistances.isEmpty) return null;

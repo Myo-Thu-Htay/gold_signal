@@ -46,6 +46,7 @@ dependencies:
   syncfusion_flutter_charts: ^32.2.7 
   web_socket_channel: ^3.0.3
   flutter_local_notifications: ^20.1.0
+  numberpicker: ^2.1.2
 
 dev_dependencies:
   flutter_test:
