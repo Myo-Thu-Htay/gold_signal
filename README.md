@@ -89,10 +89,10 @@ The app detects trading opportunities using:
 
 Example trade setup:
 
-Entry: Breakout Retest
-Risk/Reward: 1:2
-Stop Loss: Structure Low
-Take Profit: Next Resistance
+- Entry: Breakout Retest
+- Risk/Reward: 1:2
+- Stop Loss: Structure Low
+- Take Profit: Next Resistance
 
 ---
 
