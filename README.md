@@ -39,37 +39,6 @@ The app helps traders monitor price action, calculate trade risk/reward, and man
 
 ---
 
-📂 Project Structure
-
-lib/
- ├── account/
- ├── core/
- |    ├── config/
- |    ├── constants/
- |    ├── error/
- |    ├── logging/
- |    ├── routing/
- |    └── theme/
- ├── dashboard/
- |    ├── models/
- │    ├── pages/
- |    ├── provider/
- |    ├── service/
- │    ├── widgets/
- |    └── mainpage.dart
- ├── signal_engine/
- |    ├── api/
- |    ├── model/
- |    ├── provider/
- |    ├── services/
- |
- ├── app.dart
- ├── main.dart
- └── splash_screen.dart
-
-
----
-
 ⚙️ Installation
 
 1️⃣ Clone the repository
