@@ -27,7 +27,6 @@ class PortfolioPage extends ConsumerWidget {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               ref.invalidate(equityCurveProvider);
-              ref.invalidate(tradeHistoryProvider);
             },
           )
         ],

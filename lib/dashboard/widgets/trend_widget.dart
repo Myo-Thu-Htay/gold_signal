@@ -48,14 +48,18 @@ class _TrendWidgetState extends ConsumerState<TrendWidget> {
           final rsiValue = sortedTrend.isNotEmpty
               ? signalService.calculateRSI(sortedTrend)
               : 50.0;
-          double minPrice =
-              sortedTrend.map((c) => c.low).reduce((a, b) => a < b ? a : b);
-          double maxPrice =
-              sortedTrend.map((c) => c.high).reduce((a, b) => a > b ? a : b);
-          DateTime lastTime = lastCandle!.time;
-          DateTime futureTime = lastTime.add(Duration(hours: 5));
           int startIndex =
               sortedTrend.length > 100 ? sortedTrend.length - 100 : 0;
+          double minPrice = sortedTrend
+              .sublist(startIndex - 50, startIndex)
+              .map((c) => c.low)
+              .reduce((a, b) => a < b ? a : b);
+          double maxPrice = sortedTrend
+              .sublist(startIndex - 50, startIndex)
+              .map((c) => c.high)
+              .reduce((a, b) => a > b ? a : b);
+          DateTime lastTime = lastCandle!.time;
+          DateTime futureTime = lastTime.add(Duration(hours: 5));
           double open = lastCandle.open;
           double high = lastCandle.high;
           double low = lastCandle.low;
@@ -75,13 +79,15 @@ class _TrendWidgetState extends ConsumerState<TrendWidget> {
                           coordinateUnit: CoordinateUnit.point,
                           clip: ChartClipBehavior.hide,
                           horizontalAlignment: ChartAlignment.far,
-                          x: futureTime.add(Duration(hours: 7)),
+                          x: DateTime.now()
+                              .toLocal()
+                              .add(Duration(minutes: startIndex * 5)),
                           y: lastClose,
                           widget: Container(
                             decoration: BoxDecoration(
                               color: lastCandle.close >= lastCandle.open
-                                  ? Colors.green.withValues(alpha: 0.7)
-                                  : Colors.red.withValues(alpha: 0.7),
+                                  ? Colors.green
+                                  : Colors.red,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(

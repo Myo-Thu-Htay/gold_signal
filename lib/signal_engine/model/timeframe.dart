@@ -1,5 +1,5 @@
 enum Timeframe {
-  m1,
+ 
   m5,
   m15,
   m30,
@@ -12,8 +12,6 @@ extension TimeframeExtension on Timeframe {
   String get label => name.toUpperCase();
   String get apiValue {
     switch (this) {
-      case Timeframe.m1:
-        return '1';
       case Timeframe.m5:
         return '5';
       case Timeframe.m15:
@@ -32,8 +30,6 @@ extension TimeframeExtension on Timeframe {
   }
   String get displayName {
     switch (this) {
-      case Timeframe.m1:
-        return 'minute';
       case Timeframe.m5:
         return 'minute';
       case Timeframe.m15:
@@ -52,8 +48,6 @@ extension TimeframeExtension on Timeframe {
   }
   String get name {
     switch (this) {
-      case Timeframe.m1:
-        return '1m';
       case Timeframe.m5:
         return '5m';
       case Timeframe.m15:

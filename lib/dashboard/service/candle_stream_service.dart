@@ -20,8 +20,6 @@ class CandleStreamService {
   }
   String mapTimeFrameToBinance(Timeframe tf) {
     switch (tf) {
-      case Timeframe.m1:
-        return '1m';
       case Timeframe.m5:
         return '5m';
       case Timeframe.m15:
