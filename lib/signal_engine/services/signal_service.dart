@@ -1,7 +1,4 @@
-// ignore_for_file: curly_braces_in_flow_control_structures
-
 import '../model/multi_timeframe_model.dart';
-
 import '../model/candle.dart';
 import 'volume_filter.dart';
 
@@ -159,7 +156,9 @@ class SignalService {
   String generateSignal(MultiTimeFrameModel multiTf, int score) {
     if (multiTf.h1.length < 50 ||
         multiTf.m15.length < 50 ||
-        multiTf.m5.length < 50) return 'Hold';
+        multiTf.m5.length < 50) {
+      return 'Hold';
+    }
     bool h1Bull = isBullish(multiTf.h1);
     bool h1Bear = isBearish(multiTf.h1);
     bool pullBack = isPullBackToEMA50(multiTf.m15);
@@ -170,14 +169,16 @@ class SignalService {
     //     'H1 Bull: $h1Bull, H1 Bear: $h1Bear, PullBack: $pullBack,  RSI Bull: $rsiBull, RSI Bear: $rsiBear');
     if (h1Bull && pullBack && score >= 10 && rsiBull) {
       return 'Strong Buy';
-    } else if (h1Bear && pullBack && score >= -10 && rsiBear) {
-      return 'Strong Sell';
-    } else if (h1Bull && rsiBull && score >= 6) {
-      return 'Buy';
-    } else if (h1Bear && rsiBear && score >= -6) {
-      return 'Sell';
-    } else {
-      return 'Hold';
     }
+    if (h1Bear && pullBack && score <= -10 && rsiBear) {
+      return 'Strong Sell';
+    }
+    if (h1Bull && rsiBull && score >= 6) {
+      return 'Buy';
+    }
+    if (h1Bear && rsiBear && score <= -6) {
+      return 'Sell';
+    }
+    return 'Hold';
   }
 }

@@ -39,10 +39,10 @@ class SettingsNotifier extends AsyncNotifier<SettingState> {
         enabled = false; // Revert to disabled if permission not granted
       }
     }
-    if (!enabled) {
+    if (!enabled && currentStatus) {
       // Optionally, you can show a dialog to guide users to settings
       // openNotificationSettings(context);
-      showDialog(
+      bool? confirm = await showDialog<bool>(
         // ignore: use_build_context_synchronously
         context: context,
         builder: (context) => AlertDialog(
@@ -55,24 +55,25 @@ class SettingsNotifier extends AsyncNotifier<SettingState> {
               'Disabling will stop all alerts.\nYou can re-enable them in settings.'),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context)
+                  .pop(false), // User cancels, keep enabled
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 openAppSettings();
-                enabled = false;
-                Navigator.of(context).pop();
+                Navigator.of(context)
+                    .pop(true); // User confirms, disable notifications
               },
               child: const Text('Open Settings'),
             ),
           ],
         ),
       );
-      if (currentStatus) {
-        enabled = true; // Revert to enabled if user cancels
+      if (confirm != true) {
+        enabled = true; // User canceled, keep notifications enabled
+      } else {
+        enabled = false; // User confirmed, disable notifications
       }
     }
     await prefs.setBool('notificationsEnabled', enabled);

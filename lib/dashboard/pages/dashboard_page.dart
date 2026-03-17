@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../signal_engine/services/signal_service.dart';
+import 'package:gold_signal/signal_engine/model/trade_signal.dart';
 import '../../../signal_engine/model/timeframe.dart';
 import '../../../signal_engine/provider/market_provider.dart';
 import '../../../signal_engine/provider/signal_provider.dart';
-import '../../signal_engine/provider/signal_validator_provider.dart';
-import '../../signal_engine/services/trend_service.dart';
+import '../provider/trend_provider.dart';
 import '../widgets/trend_widget.dart';
 
 class DashboardPage extends ConsumerWidget {
@@ -13,11 +12,7 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final candlesAsync = ref.watch(binanceCandlesProvider);
-    final signalAsync = ref.watch(signalProvider);
-    final selectedTF = ref.watch(selectedTimeframeProvider);
-    final bCandlesAsync = ref.watch(getBinanceCandles);
-
+    final signal = ref.watch(signalProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Gold Signal"),
@@ -28,14 +23,14 @@ class DashboardPage extends ConsumerWidget {
         child: Column(
           children: [
             /// PRICE PANEL
-            _pricePanel(ref, candlesAsync, selectedTF),
+            _pricePanel(ref),
 
             /// TREND PANEL
-            _trendPanel(candlesAsync, bCandlesAsync),
+            _trendPanel(ref),
 
             /// CHART
             Expanded(
-              child: _chartPanel(candlesAsync),
+              child: _chartPanel(ref),
             ),
 
             /// SIGNAL CARD
@@ -44,9 +39,7 @@ class DashboardPage extends ConsumerWidget {
             /// The card itself will handle showing "HOLD SIGNAL" if entry == 0
             /// This way we only show the card when we have actual signal data to display
             /// If signalAsync is still loading or has an error, the card won't show at all
-            if (signalAsync.asData?.value != null &&
-                signalAsync.asData?.value.entry != 0)
-              _signalPanel(ref),
+            if (signal != null && signal.entry != 0) _signalPanel(signal),
             const SizedBox(height: 10),
           ],
         ),
@@ -55,8 +48,9 @@ class DashboardPage extends ConsumerWidget {
   }
 
   /// PRICE
-  Widget _pricePanel(
-      WidgetRef ref, AsyncValue candlesAsync, Timeframe selectedTF) {
+  Widget _pricePanel(WidgetRef ref) {
+    final candlesAsync = ref.watch(binanceCandlesProvider);
+    final selectedTF = ref.watch(selectedTimeframeProvider);
     return candlesAsync.when(
       data: (candle) {
         return Row(
@@ -82,10 +76,6 @@ class DashboardPage extends ConsumerWidget {
               }).toList(),
               onChanged: (value) {
                 ref.read(selectedTimeframeProvider.notifier).state = value!;
-                // Trigger signal refresh
-                ref.invalidate(binanceCandlesProvider);
-                ref.invalidate(signalProvider);
-                ref.invalidate(getBinanceCandles);
               },
             ),
           ],
@@ -97,58 +87,34 @@ class DashboardPage extends ConsumerWidget {
   }
 
   /// TREND
-  Widget _trendPanel(AsyncValue candlesAsync, AsyncValue bCandlesAsync) {
+  Widget _trendPanel(WidgetRef ref) {
+    final trend = ref.watch(trendProvider);
+    final signal = ref.watch(signalProvider);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
       color: Colors.grey[200],
-      child: bCandlesAsync.when(
-        data: (candle) {
-          final SignalService scoreService = SignalService();
-          final TrendService trendService = TrendService();
-          final score = scoreService.calculateConfidence(candle);
-          final quality = scoreService.generateSignal(candle, score);
-          return candlesAsync.when(
-            data: (tcandle) {
-              final trend = trendService.isTrendReversal(tcandle)
-                  ? "Trend Reversal"
-                  : trendService.isUptrend(tcandle)
-                      ? "Uptrend"
-                      : trendService.isDowntrend(tcandle)
-                          ? "Downtrend"
-                          : trendService.isTrendContinuation(tcandle)
-                              ? "Trend Continuation"
-                              : trendService.isSideways(tcandle)
-                                  ? "Sideways"
-                                  : "Unknown";
-              return Row(
-                children: [
-                  Text(
-                    "Trend: $trend",
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 16, color: Colors.black),
-                  ),
-                  const Spacer(),
-                  Text(
-                    "Signal: $quality",
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 16, color: Colors.black),
-                  ),
-                ],
-              );
-            },
-            loading: () => const Text("Loading..."),
-            error: (e, st) => const Text("Error"),
-          );
-        },
-        loading: () => const Text("Loading..."),
-        error: (e, st) => const Text("Error"),
+      child: Row(
+        children: [
+          Text(
+            "Trend: $trend",
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 16, color: Colors.black),
+          ),
+          const Spacer(),
+          Text(
+            "Signal: ${(signal?.isBuy == true) ? 'BUY' : (signal?.isBuy == false) ? 'SELL' : 'HOLD'}",
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 16, color: Colors.black),
+          ),
+        ],
       ),
     );
   }
 
   /// CHART
-  Widget _chartPanel(AsyncValue candlesAsync) {
+  Widget _chartPanel(WidgetRef ref) {
+    final candlesAsync = ref.watch(binanceCandlesProvider);
     return candlesAsync.when(
       data: (candles) {
         return Container(
@@ -168,74 +134,61 @@ class DashboardPage extends ConsumerWidget {
 }
 
 /// SIGNAL
-Widget _signalPanel(WidgetRef ref) {
-  final validate = ref.watch(signalValidatorProvider.notifier);
-  final signalAsync = ref.watch(signalProvider);
-  return signalAsync.when(
-    data: (signal) {
-      validate.addSignal(signal);
-      final isBuy = signal.isBuy;
-      final risk = (signal.entry - signal.stopLoss).abs();
-      final reward = (signal.takeProfit - signal.entry).abs();
-      final rr = reward / risk;
-      int maxConfidence = 20;
-      int positive = signal.confidence + maxConfidence;
-      double confidencePercent = (positive / (maxConfidence * 2)) * 100;
-      return Card(
-        color: (isBuy && signal.entry != 0)
-            ? Colors.green
-            : (!isBuy && signal.entry != 0)
-                ? Colors.red
-                : Colors.grey,
-        margin: const EdgeInsets.all(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(
-                isBuy ? "BUY SIGNAL" : "SELL SIGNAL",
-                style: const TextStyle(
-                  fontSize: 22,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              _row("Entry", signal.entry),
-              _row("Stop Loss", signal.stopLoss),
-              _row("Take Profit", signal.takeProfit),
-              _row("Lot Size", signal.lotSize),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('RR:', style: const TextStyle(color: Colors.white)),
-                    Text('1:${rr.toStringAsFixed(0)}',
-                        style: const TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Confidence',
-                        style: const TextStyle(color: Colors.white)),
-                    Text(
-                        "${confidencePercent.clamp(0, 100).toStringAsFixed(0)} %",
-                        style: const TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ],
+Widget _signalPanel(TradeSignal signal) {
+  final isBuy = signal.isBuy;
+  final risk = (signal.entry - signal.stopLoss).abs();
+  final reward = (signal.takeProfit - signal.entry).abs();
+  final rr = reward / risk;
+  return Card(
+    color: (isBuy && signal.entry != 0)
+        ? Colors.green
+        : (!isBuy && signal.entry != 0)
+            ? Colors.red
+            : Colors.grey,
+    margin: const EdgeInsets.all(12),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Text(
+            isBuy ? "BUY SIGNAL" : "SELL SIGNAL",
+            style: const TextStyle(
+              fontSize: 22,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      );
-    },
-    loading: () => const SizedBox(),
-    error: (e, st) => const SizedBox(),
+          const SizedBox(height: 10),
+          _row("Entry", signal.entry),
+          _row("Stop Loss", signal.stopLoss),
+          _row("Take Profit", signal.takeProfit),
+          _row("Lot Size", signal.lotSize),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('RR:', style: const TextStyle(color: Colors.white)),
+                Text('1:${rr.toStringAsFixed(0)}',
+                    style: const TextStyle(color: Colors.white)),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Confidence', style: const TextStyle(color: Colors.white)),
+                Text(
+                    "${(signal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)} %",
+                    style: const TextStyle(color: Colors.white)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
   );
 }
 
