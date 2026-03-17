@@ -5,9 +5,27 @@ class SignalValidator {
   static TradeSignal validateSignal(TradeSignal signal, double currentPrice) {
     
     double maxMove = (signal.takeProfit - signal.entry).abs() * 0.5; // 50% of expected move
-    // Check if signal is already expired
-    if (signal.status != SignalStatus.active) {
-      return signal; // No change if not active
+    
+    // Trigger entry
+    if (signal.status == SignalStatus.pending && signal.entryZone.contains(currentPrice)) {
+      return signal.copyWith(status: SignalStatus.active);
+    }
+
+    // Active signal validation
+    if (signal.status == SignalStatus.active) {
+      if (signal.isBuy) {
+        if (currentPrice >= signal.takeProfit) {
+          return signal.copyWith(status: SignalStatus.tpHit);
+        } else if (currentPrice <= signal.stopLoss) {
+          return signal.copyWith(status: SignalStatus.slHit);
+        }
+      } else {
+        if (currentPrice <= signal.takeProfit) {
+          return signal.copyWith(status: SignalStatus.tpHit);
+        } else if (currentPrice >= signal.stopLoss) {
+          return signal.copyWith(status: SignalStatus.slHit);
+        }
+      }
     }
     //Missed Entry Validation
     if (signal.isBuy && currentPrice > signal.entry + maxMove) {
@@ -20,23 +38,6 @@ class SignalValidator {
           expiryMinutes) {
         signal = signal.copyWith(status: SignalStatus.expired);
       } // Expiry Validation
-    // Buy Signal Validation
-    if (signal.isBuy) {
-      if (currentPrice >= signal.takeProfit) {
-        signal = signal.copyWith(status: SignalStatus.tpHit);
-      } 
-      if (currentPrice <= signal.stopLoss) {
-        signal = signal.copyWith(status: SignalStatus.slHit);
-      }
-    } else {
-      // Sell Signal Validation
-      if (currentPrice <= signal.takeProfit) {
-        signal = signal.copyWith(status: SignalStatus.tpHit);
-      } 
-      if (currentPrice >= signal.stopLoss) {
-        signal = signal.copyWith(status: SignalStatus.slHit);
-      } 
-     }
     return signal;
   }
 }

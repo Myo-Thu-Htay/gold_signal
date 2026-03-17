@@ -1,9 +1,11 @@
 import '../model/multi_timeframe_model.dart';
 import '../model/candle.dart';
+import 'trend_service.dart';
 import 'volume_filter.dart';
 
 class SignalService {
   final VolumeFilter _volumeFilter = VolumeFilter();
+  final TrendService _trendService = TrendService();
   bool isBullish(List<Candle> candles) {
     if (candles.length < 50) return false;
     double ema50 = calculateEMA(candles, 50);
@@ -123,12 +125,12 @@ class SignalService {
   // RSI confirmation
   bool rsiBullish(List<Candle> candles) {
     double rsi = calculateRSI(candles);
-    return rsi > 45 && rsi < 75;
+    return rsi > 50 && rsi < 70;
   }
 
   bool rsiBearish(List<Candle> candles) {
     double rsi = calculateRSI(candles);
-    return rsi < 45 && rsi > 30;
+    return rsi < 50 && rsi > 30;
   }
 
   List<Candle> calculateMA(List<Candle> candles, int period) {
@@ -153,10 +155,28 @@ class SignalService {
     return maCandles;
   }
 
+  bool isBuyRejection(List<Candle> candles) {
+    if (candles.length < 2) return false;
+    final lastCandle = candles.last;
+    final prevCandle = candles[candles.length - 2];
+    bool lowerRejection =
+        lastCandle.open - lastCandle.low > (lastCandle.close - lastCandle.open) * 2 &&
+            lastCandle.close > prevCandle.close;
+    return lowerRejection;
+  }
+  bool isSellRejection(List<Candle> candles) {
+    if (candles.length < 2) return false;
+    final lastCandle = candles.last;
+    final prevCandle = candles[candles.length - 2];
+    bool upperRejection =
+        lastCandle.high - lastCandle.close > (lastCandle.close - lastCandle.open) * 2 &&
+            lastCandle.close < prevCandle.close;
+    return upperRejection;
+  }
+
   String generateSignal(MultiTimeFrameModel multiTf, int score) {
-    if (multiTf.h1.length < 50 ||
-        multiTf.m15.length < 50 ||
-        multiTf.m5.length < 50) {
+    final trend = _trendService.analyzeTrend(multiTf.h1);
+    if (trend.direction == TrendDirection.sideways && !trend.isHealthy) {
       return 'Hold';
     }
     bool h1Bull = isBullish(multiTf.h1);
@@ -164,19 +184,21 @@ class SignalService {
     bool pullBack = isPullBackToEMA50(multiTf.m15);
     bool rsiBull = rsiBullish(multiTf.m15);
     bool rsiBear = rsiBearish(multiTf.m15);
+    bool isBullishBreak = bullishBreak(multiTf.m5);
+    bool isBuyReject = isBuyRejection(multiTf.m5);
+    bool isSellReject = isSellRejection(multiTf.m5);
 
-    // print(
-    //     'H1 Bull: $h1Bull, H1 Bear: $h1Bear, PullBack: $pullBack,  RSI Bull: $rsiBull, RSI Bear: $rsiBear');
-    if (h1Bull && pullBack && score >= 10 && rsiBull) {
+
+    if (h1Bull && pullBack && rsiBull && isBullishBreak && isBuyReject) {
       return 'Strong Buy';
     }
-    if (h1Bear && pullBack && score <= -10 && rsiBear) {
+    if (h1Bear && pullBack && rsiBear && !isBullishBreak && isSellReject) {
       return 'Strong Sell';
     }
-    if (h1Bull && rsiBull && score >= 6) {
+    if (h1Bull && rsiBull && isBuyReject && isBullishBreak) {
       return 'Buy';
     }
-    if (h1Bear && rsiBear && score <= -6) {
+    if (h1Bear && rsiBear && isSellReject && !isBullishBreak) {
       return 'Sell';
     }
     return 'Hold';

@@ -1,12 +1,16 @@
+import 'package:gold_signal/signal_engine/model/entry_zone_model.dart';
+
 enum SignalStatus {
   active,
   tpHit,
   slHit,
+  pending,
   expired,
   invalid,
 }
 class TradeSignal {
   final bool isBuy;
+  final EntryZone entryZone;
   final double entry;
   final double stopLoss;
   final double takeProfit;
@@ -16,6 +20,7 @@ class TradeSignal {
   DateTime generatedAt;
   TradeSignal({
     required this.isBuy,
+    required this.entryZone,
     required this.entry,
     required this.stopLoss,
     required this.takeProfit,
@@ -27,6 +32,7 @@ class TradeSignal {
   factory TradeSignal.fromJson(Map<String, dynamic> json) {
     return TradeSignal(
       isBuy: json['isBuy'] as bool,
+      entryZone: EntryZone.fromJson(json['entryZone'] as Map<String, double>),
       entry: (json['entry'] as num).toDouble(),
       stopLoss: (json['stopLoss'] as num).toDouble(),
       takeProfit: (json['takeProfit'] as num).toDouble(),
@@ -45,6 +51,7 @@ class TradeSignal {
   Map<String, dynamic> toJson() {
     return {
       'isBuy': isBuy,
+      'entryZone': entryZone.toJson(),
       'entry': entry,
       'stopLoss': stopLoss,
       'takeProfit': takeProfit,
@@ -58,6 +65,7 @@ class TradeSignal {
   TradeSignal copyWith({SignalStatus? status}) {
     return TradeSignal(
       isBuy: isBuy,
+      entryZone: entryZone,
       entry: entry,
       stopLoss: stopLoss,
       takeProfit: takeProfit,

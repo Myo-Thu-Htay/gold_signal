@@ -62,7 +62,7 @@ void onStart(ServiceInstance service) async {
             jsonEncode(validSignal
                 .toJson())); // Store or update the signal in local storage
         final newId =
-            "${validSignal.isBuy}_${validSignal.entry}_${validSignal.stopLoss}_${validSignal.takeProfit}";
+            "${validSignal.isBuy}_${validSignal.entryZone.min}_${validSignal.entryZone.max}_${validSignal.stopLoss}_${validSignal.takeProfit}";
         final exits = prefs.getString('signal_ids');
         if (newId != exits) {
           bool isOn = prefs.getBool('notificationsEnabled') ?? true;

@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:gold_signal/signal_engine/model/entry_zone_model.dart';
+
 import '../model/candle.dart';
 import '../model/srzone_model.dart';
 
@@ -75,4 +77,28 @@ class SrService {
 
     return zones.where((z) => z.touches >= minTouches).toList();
   }
-}
+
+  static EntryZone getNearestZone(double price, List<SrServiceZone> zones) {
+    if (zones.isEmpty) return EntryZone(price - 0.5, price + 0.5); // Default zone if no zones found
+    final supports =
+        zones.where((z) => z.isSupport && z.price < price).toList();
+    //print('Supports: ${supports.map((s) => s.price).toList()}');
+    final resistances =
+        zones.where((z) => !z.isSupport && z.price > price).toList();
+    //print('Resistances: ${resistances.map((r) => r.price).toList()}');
+    final nearestSupport = supports.reduce((a, b) =>
+          (price - a.price).abs() < (price - b.price).abs()
+              ? a
+              : b);
+
+      final nearestResistance = resistances.reduce((a, b) =>
+          (price - a.price).abs() < (price - b.price).abs()
+              ? a
+              : b);
+  
+      final minPrice = min(nearestSupport.price, nearestResistance.price);
+      final maxPrice = max(nearestSupport.price, nearestResistance.price);
+      return EntryZone(minPrice, maxPrice);
+    }
+  }
+

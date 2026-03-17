@@ -7,22 +7,13 @@ final trendProvider = Provider((ref) {
   if (candles == null) return "Loading";
   final trendService = TrendService();
 
-  if (trendService.isTrendReversal(candles)) {
-    return "Reversal";
+  final trendInfo = trendService.analyzeTrend(candles);
+  switch (trendInfo.direction) {
+    case TrendDirection.up:
+      return "Uptrend";
+    case TrendDirection.down:
+      return "Downtrend";
+    case TrendDirection.sideways:
+      return "Sideways";
   }
-  if (trendService.isUptrend(candles)) {
-    return "Uptrend";
-  }
-  if (trendService.isDowntrend(candles)) {
-    return "Downtrend";
-  }
-  if (trendService.isTrendContinuation(candles)) {
-    return "Continuation";
-  }
-  if (trendService.isSideways(candles)) {
-    return "Sideways";
-  }
-  return "Unknown";
 });
-
-
