@@ -51,8 +51,16 @@ void onStart(ServiceInstance service) async {
       lastCandleTime = latestTime;
       final signal =
           await engine.evaluate(candles, accountBalance, riskPercent);
+      if (kDebugMode) {
+        print(
+            'Signal generated with ${signal.status.toString().split('.').last.toUpperCase()} status');
+      }
       final validSignal =
           SignalValidator.validateSignal(signal, candles.m5.last.close);
+      if (kDebugMode) {
+        print(
+            'Signal generated with status ${validSignal.status.toString().split('.').last.toUpperCase()}');
+      }
       if (validSignal.status == SignalStatus.active) {
         service.invoke('update_signal', {
           'signal': validSignal.toJson(),
@@ -62,7 +70,7 @@ void onStart(ServiceInstance service) async {
             jsonEncode(validSignal
                 .toJson())); // Store or update the signal in local storage
         final newId =
-            "${validSignal.isBuy}_${validSignal.entryZone.min}_${validSignal.entryZone.max}_${validSignal.stopLoss}_${validSignal.takeProfit}";
+            "${validSignal.isBuy}_${validSignal.entryZone.min.round()}_${validSignal.entryZone.max.round()}_${validSignal.stopLoss.round()}_${validSignal.takeProfit.round()}";
         final exits = prefs.getString('signal_ids');
         if (newId != exits) {
           bool isOn = prefs.getBool('notificationsEnabled') ?? true;
@@ -85,7 +93,7 @@ void onStart(ServiceInstance service) async {
                   title:
                       "Signal ${validSignal.status.toString().split('.').last.toUpperCase()}",
                   body:
-                      "The latest signal is now ${validSignal.status.toString().split('.').last.toUpperCase()}");
+                      "Status: ${validSignal.status.toString().split('.').last.toUpperCase()} ${validSignal.isBuy ? 'BUY' : 'SELL'} at ${validSignal.entry.toStringAsFixed(2)} with confidence ${(validSignal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%");
             }
             await prefs.setString('latest_signal_status',
                 newStatus); // Update the stored signal status
@@ -94,7 +102,8 @@ void onStart(ServiceInstance service) async {
         await prefs.remove('latest_signal'); // Remove expired/invalid signal
       }
       if (kDebugMode) {
-        print('Signal status: ${validSignal.status}');
+        print(
+            'Signal status: ${validSignal.status.toString().split('.').last.toUpperCase()} ${validSignal.isBuy ? 'BUY' : 'SELL'} at ${validSignal.entry.toStringAsFixed(2)} with confidence ${(validSignal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%');
       }
     } catch (e, stackTrace) {
       if (kDebugMode) {

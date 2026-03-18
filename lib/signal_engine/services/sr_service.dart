@@ -79,26 +79,38 @@ class SrService {
   }
 
   static EntryZone getNearestZone(double price, List<SrServiceZone> zones) {
-    if (zones.isEmpty) return EntryZone(price - 0.5, price + 0.5); // Default zone if no zones found
+    if (zones.isEmpty) {
+      return EntryZone(
+          price - 0.5, price + 0.5); // Default zone if no zones found
+    }
     final supports =
         zones.where((z) => z.isSupport && z.price < price).toList();
     //print('Supports: ${supports.map((s) => s.price).toList()}');
     final resistances =
         zones.where((z) => !z.isSupport && z.price > price).toList();
     //print('Resistances: ${resistances.map((r) => r.price).toList()}');
-    final nearestSupport = supports.reduce((a, b) =>
-          (price - a.price).abs() < (price - b.price).abs()
-              ? a
-              : b);
+    if (supports.isEmpty && resistances.isEmpty) {
+      return EntryZone(
+          price - 0.5, price + 0.5); // Default zone if no zones found
+    } else if (supports.isEmpty) {
+      final nearestResistance = resistances.reduce(
+          (a, b) => (price - a.price).abs() < (price - b.price).abs() ? a : b);
+      return EntryZone(
+          nearestResistance.price - 0.5, nearestResistance.price + 0.5);
+    } else if (resistances.isEmpty) {
+      final nearestSupport = supports.reduce(
+          (a, b) => (price - a.price).abs() < (price - b.price).abs() ? a : b);
+      return EntryZone(nearestSupport.price - 0.5, nearestSupport.price + 0.5);
+    } else {
+      final nearestSupport = supports.reduce(
+          (a, b) => (price - a.price).abs() < (price - b.price).abs() ? a : b);
 
-      final nearestResistance = resistances.reduce((a, b) =>
-          (price - a.price).abs() < (price - b.price).abs()
-              ? a
-              : b);
-  
+      final nearestResistance = resistances.reduce(
+          (a, b) => (price - a.price).abs() < (price - b.price).abs() ? a : b);
+
       final minPrice = min(nearestSupport.price, nearestResistance.price);
       final maxPrice = max(nearestSupport.price, nearestResistance.price);
       return EntryZone(minPrice, maxPrice);
     }
   }
-
+}

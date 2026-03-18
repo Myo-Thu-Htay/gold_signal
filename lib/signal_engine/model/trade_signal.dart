@@ -34,11 +34,8 @@ class TradeSignal {
     return TradeSignal(
       isBuy: json['isBuy'] as bool,
       entryZone: json['entryZone'] != null
-          ? EntryZone.fromJson(json['entryZone'] as Map<String, double>)
-          : EntryZone(
-              0.0,
-              0.0,
-            ),
+          ? EntryZone.fromJson(json['entryZone'] as Map<String, dynamic>) 
+          : EntryZone(0, 0),
       entry: (json['entry'] as num).toDouble(),
       stopLoss: (json['stopLoss'] as num).toDouble(),
       takeProfit: (json['takeProfit'] as num).toDouble(),
