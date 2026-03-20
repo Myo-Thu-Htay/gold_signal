@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../model/entry_zone_model.dart';
 import '../model/trade_signal.dart';
 
 final signalProvider =
@@ -22,9 +21,6 @@ class SignalProviderNotifier extends StateNotifier<TradeSignal?> {
         ? TradeSignal.fromJson(jsonDecode(data))
         : TradeSignal(
             status: SignalStatus.expired,
-            entryZone: data != null
-                ? EntryZone.fromJson(jsonDecode(data)['entryZone'])
-                : EntryZone(0, 0),
             entry: 0,
             stopLoss: 0,
             takeProfit: 0,

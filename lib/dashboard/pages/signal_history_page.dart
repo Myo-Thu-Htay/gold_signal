@@ -20,15 +20,14 @@ class _SignalHistoryPageState extends ConsumerState<SignalHistoryPage> {
   }
 
   Future<void> _loadInitialSignal() async {
-     final sg= await ref.read(signalValidatorProvider.notifier).loadSignals();
-      setState(() {
-        signals = sg;
-      });
+    final sg = await ref.read(signalValidatorProvider.notifier).loadSignals();
+    setState(() {
+      signals = sg;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Signal History'),
@@ -43,7 +42,9 @@ class _SignalHistoryPageState extends ConsumerState<SignalHistoryPage> {
                 return Dismissible(
                   key: Key(signal.entry.toString()),
                   onDismissed: (direction) {
-                    ref.read(signalValidatorProvider.notifier).removeSignal(signal);
+                    ref
+                        .read(signalValidatorProvider.notifier)
+                        .removeSignal(signal);
                   },
                   child: Card(
                     margin:
@@ -58,8 +59,9 @@ class _SignalHistoryPageState extends ConsumerState<SignalHistoryPage> {
                               title: Text(
                                 'Signal Details',
                                 style: TextStyle(
-                                    color:
-                                        signal.isBuy ? Colors.green : Colors.red),
+                                    color: signal.isBuy
+                                        ? Colors.green
+                                        : Colors.red),
                               ),
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -87,8 +89,7 @@ class _SignalHistoryPageState extends ConsumerState<SignalHistoryPage> {
                                               : signal.status ==
                                                       SignalStatus.expired
                                                   ? Colors.grey
-                                                  
-                                                      : Colors.blue,
+                                                  : Colors.blue,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -105,7 +106,9 @@ class _SignalHistoryPageState extends ConsumerState<SignalHistoryPage> {
                         );
                       },
                       leading: Icon(
-                        signal.isBuy ? Icons.arrow_upward : Icons.arrow_downward,
+                        signal.isBuy
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward,
                         color: signal.isBuy ? Colors.green : Colors.red,
                       ),
                       title: Text(
@@ -119,17 +122,21 @@ class _SignalHistoryPageState extends ConsumerState<SignalHistoryPage> {
                             ? 'Win'
                             : signal.status == SignalStatus.slHit
                                 ? 'Loss'
-                                : signal.status == SignalStatus.expired
-                                    ? 'Expired'
-                                    : 'Pending',
+                                : signal.status == SignalStatus.active
+                                    ? 'Active'
+                                    : signal.status == SignalStatus.expired
+                                        ? 'Expired'
+                                        : 'Pending',
                         style: TextStyle(
                           color: signal.status == SignalStatus.tpHit
                               ? Colors.green
                               : signal.status == SignalStatus.slHit
                                   ? Colors.red
-                                  : signal.status == SignalStatus.expired
-                                      ? Colors.grey
-                                      : Colors.blue,
+                                  : signal.status == SignalStatus.active
+                                      ? Colors.blue
+                                      : signal.status == SignalStatus.expired
+                                          ? Colors.black
+                                          : Colors.grey,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

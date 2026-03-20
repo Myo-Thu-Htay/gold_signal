@@ -102,7 +102,7 @@ void onStart(ServiceInstance service) async {
       }
       if (kDebugMode) {
         print(
-            'Signal status: ${validSignal.status.toString().split('.').last.toUpperCase()} ${validSignal.isBuy ? 'BUY' : 'SELL'} at Zone: ${validSignal.entryZone.max.toStringAsFixed(2)} - ${validSignal.entryZone.min.toStringAsFixed(2)} Entry: ${validSignal.entry.toStringAsFixed(2)}  SL: ${validSignal.stopLoss.toStringAsFixed(2)} TP: ${validSignal.takeProfit.toStringAsFixed(2)} Lot: ${validSignal.lotSize.toStringAsFixed(2)} with confidence ${(validSignal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%');
+            'Signal status: ${validSignal.status.toString().split('.').last.toUpperCase()} ${validSignal.isBuy ? 'BUY' : 'SELL'} at  Entry: ${validSignal.entry.toStringAsFixed(2)}  SL: ${validSignal.stopLoss.toStringAsFixed(2)} TP: ${validSignal.takeProfit.toStringAsFixed(2)} Lot: ${validSignal.lotSize.toStringAsFixed(2)} with confidence ${(validSignal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%');
       }
     } catch (e, stackTrace) {
       if (kDebugMode) {

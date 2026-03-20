@@ -29,11 +29,6 @@ class SignalValidator {
         }
       }
     }
-    // if (DateTime.now().difference(signal.generatedAt).inMinutes >
-    //     expiryMinutes) {
-    //   signal = signal.copyWith(status: SignalStatus.expired);
-    // } // Expiry Validation
-    //Missed Entry Validation
     if (signal.isBuy && currentPrice > signal.entry + buyMaxMove) {
       return signal.copyWith(status: SignalStatus.expired); // Missed buy entry
     }
