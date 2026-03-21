@@ -51,20 +51,6 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     });
   }
 
-  // Future<void> _loadInitialSignal() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final signalJson = prefs.getStringList('valid_signals');
-  //   if (signalJson != null) {
-  //     final signalMap = jsonDecode(signalJson.map((s) => s).first)
-  //         as Map<String, dynamic>;
-  //     final signal = TradeSignal.fromJson(signalMap);
-  //     ref.read(signalValidatorProvider.notifier).addSignal(signal);
-  //     if (signal.status == SignalStatus.active) {
-  //       ref.read(signalProvider.notifier).saveSignal(signal);
-  //     }
-  //   }
-  // }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);

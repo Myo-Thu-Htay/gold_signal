@@ -4,7 +4,7 @@ import 'account_provider.dart';
 
 final equityCurveProvider = Provider<List<double>>((ref) {
   final trades = ref.watch(tradeHistoryProvider);
-  double balance = ref.read(accountProvider).balance;
+  double balance = ref.read(accountProvider).initialBalance;
   List<double> curve = [balance];
   for (var t in trades) {
     balance += t.pnl;

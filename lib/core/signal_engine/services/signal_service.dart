@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../constants/trading_constants.dart';
 import '../model/multi_timeframe_model.dart';
 import '../model/candle.dart';
@@ -147,18 +149,19 @@ class SignalService {
     if (candles.length < 2) return false;
     final lastCandle = candles.last;
     final prevCandle = candles[candles.length - 2];
-    bool lowerRejection =
-        lastCandle.open - lastCandle.low > (lastCandle.close - lastCandle.open) * 2 &&
-            lastCandle.close > prevCandle.close;
+    bool lowerRejection = lastCandle.open - lastCandle.low >
+            (lastCandle.close - lastCandle.open) * 2 &&
+        lastCandle.close > prevCandle.close;
     return lowerRejection;
   }
+
   bool isSellRejection(List<Candle> candles) {
     if (candles.length < 2) return false;
     final lastCandle = candles.last;
     final prevCandle = candles[candles.length - 2];
-    bool upperRejection =
-        lastCandle.high - lastCandle.close > (lastCandle.close - lastCandle.open) * 2 &&
-            lastCandle.close < prevCandle.close;
+    bool upperRejection = lastCandle.high - lastCandle.close >
+            (lastCandle.close - lastCandle.open) * 2 &&
+        lastCandle.close < prevCandle.close;
     return upperRejection;
   }
 
@@ -169,7 +172,7 @@ class SignalService {
     return (high - low) < atr * 2; // Range is less than 2 ATRs
   }
 
-   int calculateConfidence(MultiTimeFrameModel multiTf) {
+  int calculateConfidence(MultiTimeFrameModel multiTf) {
     int score = 0;
     if (isBullish(multiTf.h1)) score += 4;
     if (isBearish(multiTf.h1)) score -= 4;
@@ -189,9 +192,15 @@ class SignalService {
   String generateSignal(MultiTimeFrameModel multiTf, int score) {
     final trend = _trendService.analyzeTrend(multiTf.h1);
     if (trend.direction == TrendDirection.sideways && !trend.isHealthy) {
+      if (kDebugMode) {
+        print('Market is sideways and unhealthy, returning HOLD signal.');
+      }
       return 'Hold';
     }
     if (isRanging(multiTf.m15)) {
+      if (kDebugMode) {
+        print('Market is ranging on M15, returning HOLD signal.');
+      }
       return 'Hold';
     }
     bool h1Bull = isBullish(multiTf.h1);
@@ -203,11 +212,18 @@ class SignalService {
     bool isBuyReject = isBuyRejection(multiTf.m5);
     bool isSellReject = isSellRejection(multiTf.m5);
 
-
     if (h1Bull && pullBack && rsiBull && isBullishBreak && isBuyReject) {
+      if (kDebugMode) {
+        print(
+            'Conditions met for BUY signal: H1 Bullish, Pullback to EMA50, RSI Bullish, Bullish Break, Buy Rejection');
+      }
       return 'Buy';
     }
     if (h1Bear && pullBack && rsiBear && !isBullishBreak && isSellReject) {
+      if (kDebugMode) {
+        print(
+            'Conditions met for SELL signal: H1 Bearish, Pullback to EMA50, RSI Bearish, Bearish Break, Sell Rejection');
+      }
       return 'Sell';
     }
     return 'Hold';

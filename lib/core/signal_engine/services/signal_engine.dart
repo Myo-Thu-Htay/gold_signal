@@ -32,6 +32,11 @@ class SignalEngine {
       atr: atr,
       srZones: zone,
     );
+    if (kDebugMode) {
+      print('Generated signal: $signal with confidence: $confidence');
+      print('Current Price: $currPrice, ATR: $atr');
+      print('Calculated SR Zones: ${zone.length}, Entry Zone: ${entryZone != null ? 'Exists' : 'None'}');
+    }
     if (entryZone == null) {
       // If we can't build a valid entry zone, return a hold signal
       if (kDebugMode) {
