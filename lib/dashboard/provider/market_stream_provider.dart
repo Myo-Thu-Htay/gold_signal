@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/signal_engine/provider/market_provider.dart';
+import '../../core/signal_engine/provider/signal_validator_provider.dart';
 import '../service/candle_stream_service.dart';
 import 'controller_provider.dart';
 import 'trade_history_provider.dart';
@@ -7,6 +8,7 @@ import 'trade_history_provider.dart';
 final marketStreamProvider = Provider((ref) {
   final controller = ref.read(controllerProvider);
   final market = ref.watch(tradeHistoryProvider.notifier);
+  final validator = ref.watch(signalValidatorProvider.notifier);
   final socketService = CandleStreamService();
   final tf = ref.watch(selectedTimeframeProvider);
   socketService.start(tf);
@@ -14,6 +16,7 @@ final marketStreamProvider = Provider((ref) {
     controller.addCandle(candle);
     controller.updatePrice(candle.close);
     market.checkTradeAutoClose(candle.close);
+    validator.validateSignal(candle.close);
   });
 
   ref.onDispose(() {

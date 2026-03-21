@@ -57,24 +57,36 @@ void onStart(ServiceInstance service) async {
         if (kDebugMode) {
           print('Pending signal detected, waiting for confirmation...');
         }
-      if (validSignal.status == SignalStatus.active) {
-        service.invoke('update_signal', {
-          'signal': validSignal.toJson(),
-        }); // Send signal to the main app
-        await prefs
-            .setStringList('valid_signals', [jsonEncode(validSignal.toJson())]);
-      }
-        await prefs.setString(
-            'active_signals',
-            jsonEncode(validSignal
-                .toJson())); // Store or update the signal in local storage
-        final newId =
-            "${validSignal.status.toString().split('.').last}_${validSignal.isBuy ? 'BUY' : 'SELL'}";
-        if (kDebugMode) {
-          print('New active signal: $newId');
-        }
-        final exits = prefs.getString('signal_ids');
-        if (newId != exits) {
+        if (validSignal.status == SignalStatus.active) {
+          // Skip signals with confidence below 50%
+          if ((validSignal.confidence.abs() / 20 * 100) < 50) {
+            if (kDebugMode) {
+              print('Signal confidence below 50%, skipping notification.');
+            }
+            return; // Skip low-confidence signals
+          }
+          // Store or update the signal in local storage
+          final newId =
+              "${validSignal.status.toString().split('.').last}_${validSignal.isBuy ? 'BUY' : 'SELL'}";
+          if (kDebugMode) {
+            print('New active signal: $newId');
+          }
+          final exits = prefs.getString('signal_ids');
+          if (newId != exits) {
+             if(validSignal.entry == 0 || validSignal.stopLoss == 0 || validSignal.takeProfit == 0){
+              if (kDebugMode) {
+                print('Invalid signal data, skipping notification.');
+              }
+              return; // Skip notifications for invalid signals
+            }
+            service.invoke('update_signal', {
+              'signal': validSignal.toJson(),
+            }); // Send signal to the main app
+            await prefs.setStringList(
+                'valid_signals', [jsonEncode(validSignal.toJson())]);
+          }
+          await prefs.setString(
+              'active_signals', jsonEncode(validSignal.toJson()));
           bool isOn = prefs.getBool('notificationsEnabled') ?? true;
           prefs.setString('signal_ids', newId); // Update the stored signal ID
           if (isOn) {
@@ -89,6 +101,12 @@ void onStart(ServiceInstance service) async {
         if (validSignal.status.toString() != SignalStatus.active.toString()) {
           final newStatus = validSignal.status.toString();
           if (lastStatus != newStatus) {
+            if(validSignal.entry == 0 || validSignal.stopLoss == 0 || validSignal.takeProfit == 0){
+              if (kDebugMode) {
+                print('Invalid signal data, skipping notification.');
+              }
+              return; // Skip notifications for invalid signals
+            }
             bool isOn = prefs.getBool('notificationsEnabled') ?? true;
             if (isOn) {
               NotificationService.showNotification(

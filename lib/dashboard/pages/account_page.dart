@@ -35,6 +35,9 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     double risk = ref.watch(accountProvider).riskPercent;
     final controller = ref.watch(controllerProvider);
     final trades = ref.watch(tradeHistoryProvider);
+    double calculatePnL(bool isBuy, double entry, double exit, double lot) {
+      return isBuy ? (exit - entry) * lot * 100 : (entry - exit) * lot * 100;
+    }
 
     return settingAsync.when(
       data: (settings) {
@@ -68,21 +71,27 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                                 style: TextStyle(fontSize: 16),
                               ),
                             ],
-                          ),
+                          ), 
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Equity: ",
+                                "${AppStrings.text('equity', settings.languageCode)}:",
                                 style: TextStyle(fontSize: 16),
                               ),
                               ValueListenableBuilder(
                                   valueListenable: controller.livePrice,
                                   builder: (context, value, child) {
-                                    totalPnL =
-                                        TradeCalculator.totalPnL(trades, value);
-                                    equity = controller.calculateAccBalance(
-                                        balance, totalPnL);
+                                    if (trades.any((t) => t.isOpen)) {
+                                      equity = balance +
+                                          calculatePnL(
+                                              trades.last.isBuy,
+                                              trades.last.entry,
+                                              value,
+                                              trades.last.lotSize);
+                                    } else {
+                                      equity = balance;
+                                    }
                                     return Text(
                                       "\$${equity.toStringAsFixed(2)}",
                                       style: TextStyle(
@@ -100,7 +109,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Profit: ",
+                                "${AppStrings.text('profit', settings.languageCode)}:",
                                 style: TextStyle(fontSize: 16),
                               ),
                               ValueListenableBuilder(
@@ -162,7 +171,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                         risk = double.tryParse(_riskController.text) ?? 1;
                         ref
                             .read(accountProvider.notifier)
-                            .update(balance, risk);
+                            .updateBalanceAndRisk(balance, risk);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("Settings saved!")),
                         );

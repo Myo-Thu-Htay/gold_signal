@@ -48,13 +48,6 @@ class SettingsPage extends ConsumerWidget {
                 notifier.toggleNotifications(context, value),
               },
             ),
-            // ListTile(
-            //     autofocus: true,
-            //     title: Text(AppStrings.text('accountSettings', setting.languageCode)),
-            //     onTap: () {
-            //       // Navigate to account settings page
-            //       AppRouter.delegate.navigateTo(AppRouter.account);
-            //     }),
           ],
         ),
       );

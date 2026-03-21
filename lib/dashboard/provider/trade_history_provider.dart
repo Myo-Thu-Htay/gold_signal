@@ -73,7 +73,7 @@ class TradeHistoryNotifier extends StateNotifier<List<Trade>> {
   }) async {
     final pnl = _calculatePnL(isBuy, entry, exit, lot);
     final isWin = _isWinningTrade(isBuy, entry, exit);
-
+    
     final trade = Trade(
       isBuy: isBuy,
       entry: entry,
@@ -163,6 +163,9 @@ class TradeHistoryNotifier extends StateNotifier<List<Trade>> {
       }
       if (hitTP || hitSL) {
         needUpdate = true;
+        final balance = prefs.getDouble('account_balance')!;
+        final newBalance = balance + pnl;
+        prefs.setDouble('account_balance', newBalance);
       }
       return trade.copyWith(
         exitPrice: exitPrice,

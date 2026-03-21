@@ -4,7 +4,7 @@ import '../../core/signal_engine/model/candle.dart';
 class Controller {
   final ValueNotifier<double> livePrice = ValueNotifier(0);
   final ValueNotifier<List<Candle>> candles = ValueNotifier([]);
-  final ValueNotifier<double> accBalance = ValueNotifier(2000);
+  final ValueNotifier<double> accBalance = ValueNotifier(0);
   final ValueNotifier<double> pnl = ValueNotifier(0);
 
   void initialCandles(List<Candle> data) {

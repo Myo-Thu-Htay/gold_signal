@@ -1,11 +1,14 @@
+import '../../constants/trading_constants.dart';
 import '../model/multi_timeframe_model.dart';
 import '../model/candle.dart';
+import 'atr_service.dart';
 import 'trend_service.dart';
 import 'volume_filter.dart';
 
 class SignalService {
   final VolumeFilter _volumeFilter = VolumeFilter();
   final TrendService _trendService = TrendService();
+  final AtrService _atrService = AtrService();
   bool isBullish(List<Candle> candles) {
     if (candles.length < 50) return false;
     double ema50 = calculateEMA(candles, 50);
@@ -159,6 +162,13 @@ class SignalService {
     return upperRejection;
   }
 
+  bool isRanging(List<Candle> candles) {
+    final atr = _atrService.calculateATR(candles, TradingConstants.atrPeriod);
+    double high = candles.map((c) => c.high).reduce((a, b) => a > b ? a : b);
+    double low = candles.map((c) => c.low).reduce((a, b) => a < b ? a : b);
+    return (high - low) < atr * 2; // Range is less than 2 ATRs
+  }
+
    int calculateConfidence(MultiTimeFrameModel multiTf) {
     int score = 0;
     if (isBullish(multiTf.h1)) score += 4;
@@ -179,6 +189,9 @@ class SignalService {
   String generateSignal(MultiTimeFrameModel multiTf, int score) {
     final trend = _trendService.analyzeTrend(multiTf.h1);
     if (trend.direction == TrendDirection.sideways && !trend.isHealthy) {
+      return 'Hold';
+    }
+    if (isRanging(multiTf.m15)) {
       return 'Hold';
     }
     bool h1Bull = isBullish(multiTf.h1);

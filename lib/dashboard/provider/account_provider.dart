@@ -31,11 +31,18 @@ class AccountNotifier extends StateNotifier<AccountState> {
     state = AccountState(balance: bal, riskPercent: risk);
   }
 
-  Future<void> update(double balance, double riskPercent) async {
+  Future<void> update(double pnl) async {
+    final prefs = await SharedPreferences.getInstance();
+    final newBalance = state.balance + pnl;
+    await prefs.setDouble('account_balance', newBalance);
+    state = AccountState(balance: newBalance, riskPercent: state.riskPercent);
+  }
+
+  Future<void> updateBalanceAndRisk(double balance, double risk) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('account_balance', balance);
-    await prefs.setDouble('account_risk', riskPercent);
-    state = AccountState(balance: balance, riskPercent: riskPercent);
+    await prefs.setDouble('account_risk', risk);
+    state = AccountState(balance: balance, riskPercent: risk);
   }
 }
 
