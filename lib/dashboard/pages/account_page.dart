@@ -71,7 +71,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                                 style: TextStyle(fontSize: 16),
                               ),
                             ],
-                          ), 
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -82,13 +82,13 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                               ValueListenableBuilder(
                                   valueListenable: controller.livePrice,
                                   builder: (context, value, child) {
-                                    if (trades.any((t) => t.isOpen)) {
+                                    if (trades.any((t) => t.isOpen == true)) {
                                       equity = balance +
-                                          calculatePnL(
-                                              trades.last.isBuy,
-                                              trades.last.entry,
-                                              value,
-                                              trades.last.lotSize);
+                                          trades
+                                              .where((t) => t.isOpen == true)
+                                              .map((t) => calculatePnL(t.isBuy,
+                                                  t.entry, value, t.lotSize))
+                                              .fold(0.0, (a, b) => a + b);
                                     } else {
                                       equity = balance;
                                     }
@@ -166,8 +166,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                     const SizedBox(height: 32),
                     ElevatedButton(
                       onPressed: () {
-                        balance =
-                            double.tryParse(_balanceController.text) ?? 10000;
+                        balance = double.tryParse(_balanceController.text) ?? 0;
                         risk = double.tryParse(_riskController.text) ?? 1;
                         ref
                             .read(accountProvider.notifier)

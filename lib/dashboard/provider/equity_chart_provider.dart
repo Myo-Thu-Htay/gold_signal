@@ -16,18 +16,20 @@ final equityChartProvider = Provider<List<EquityData>>((ref) {
   final initialBalance = ref.read(accountProvider).initialBalance;
   double balance = initialBalance;
   List<EquityData> data = [];
-  
+
   for (int i = 0; i < trades.length; i++) {
     final trade = trades[i];
-    balance += trade.pnl;
+    if (!trade.isOpen && trade.pnl != 0) {
+      balance += trade.pnl;
+    }
     Color color;
     if (data.isEmpty) {
       color = Colors.blue;
     } else {
-      color = balance < data.last.equity ? Colors.red : Colors.green;
+      color = data.first.equity < data.last.equity ? Colors.red : Colors.green;
     }
     data.add(EquityData(
-      trade.entryTime,
+      trade.exitTime!,
       balance,
       color,
     ));

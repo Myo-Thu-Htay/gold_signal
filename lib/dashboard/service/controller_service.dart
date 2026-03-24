@@ -54,7 +54,6 @@ class Controller {
     this.pnl.value = pnl;
     return pnl;
   }
-
   // Calculate accumulated balance
   double calculateAccBalance(double balance, double pnl) {
     double newAccBalance = balance + pnl;

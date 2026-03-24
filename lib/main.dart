@@ -20,7 +20,7 @@ void main() async {
       'Gold Signal Notifications', // title
       description:
           'This channel is used for Gold Signal notifications.', // description
-      importance: Importance.low, // Set to low to avoid sound and vibration 
+      importance: Importance.low, // Set to low to avoid sound and vibration
     );
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<

@@ -17,6 +17,7 @@ class TradeSignal {
   final int confidence;
   SignalStatus status;
   DateTime generatedAt;
+  String? reason;
   TradeSignal({
     required this.isBuy,
     required this.entry,
@@ -27,6 +28,7 @@ class TradeSignal {
     required this.confidence,
     this.status = SignalStatus.active,
     DateTime? generatedAt,
+    this.reason,
   }) : generatedAt = generatedAt ?? DateTime.now();
   factory TradeSignal.fromJson(Map<String, dynamic> json) {
     return TradeSignal(
@@ -44,6 +46,7 @@ class TradeSignal {
       generatedAt: json['generatedAt'] != null
           ? DateTime.parse(json['generatedAt'])
           : null,
+      reason: json['reason'] as String?,
     );
   }
 
@@ -58,6 +61,7 @@ class TradeSignal {
       'confidence': confidence,
       'status': status.toString().split('.').last,
       'generatedAt': generatedAt.toIso8601String(),
+      'reason': reason,
     };
   }
 
@@ -72,6 +76,7 @@ class TradeSignal {
       confidence: confidence,
       status: status ?? this.status,
       generatedAt: generatedAt,
+      reason: reason,
     );
   }
 }

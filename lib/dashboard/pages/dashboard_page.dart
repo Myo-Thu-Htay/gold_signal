@@ -4,6 +4,7 @@ import 'package:gold_signal/core/signal_engine/model/trade_signal.dart';
 import '../../core/signal_engine/model/timeframe.dart';
 import '../../core/signal_engine/provider/market_provider.dart';
 import '../../core/signal_engine/provider/signal_provider.dart';
+import '../provider/market_stream_provider.dart';
 import '../provider/trend_provider.dart';
 import '../widgets/trend_widget.dart';
 
@@ -16,25 +17,39 @@ class DashboardPage extends ConsumerWidget {
     final candlesAsync = ref.watch(binanceCandlesProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Gold Signal"),
+        /// PRICE PANEL
+        title: _pricePanel(ref),
         centerTitle: true,
       ),
       body: Padding(
         padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
         child: Column(
           children: [
-            /// PRICE PANEL
-            _pricePanel(ref),
-
             /// TREND PANEL
             _trendPanel(ref),
 
             /// CHART
             Expanded(
               child: candlesAsync.when(
-                data: (candles) => TrendWidget(trend: candles),
+                data: (candles) => Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(8),
+                        bottomRight: Radius.circular(8),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.3),
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: TrendWidget(trend: candles)),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, st) => const Center(child: Text("Error loading chart data")),
+                error: (e, st) =>
+                    const Center(child: Text("Error loading chart data")),
               ),
             ),
 
@@ -67,6 +82,8 @@ class DashboardPage extends ConsumerWidget {
               ),
             ),
             const Spacer(),
+            const Text("Gold Signal"),
+            const Spacer(),
             DropdownButton<Timeframe>(
               value: selectedTF,
               items: Timeframe.values.map((tf) {
@@ -81,6 +98,8 @@ class DashboardPage extends ConsumerWidget {
               }).toList(),
               onChanged: (value) {
                 ref.read(selectedTimeframeProvider.notifier).state = value!;
+                ref.read(
+                    marketStreamProvider); // Restart the market stream with the new timeframe
               },
             ),
           ],
@@ -96,9 +115,22 @@ class DashboardPage extends ConsumerWidget {
     final trend = ref.watch(trendProvider);
     final signal = ref.watch(signalProvider);
     return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.3),
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       width: double.infinity,
       padding: const EdgeInsets.all(10),
-      color: Colors.grey[200],
       child: Row(
         children: [
           Text(
@@ -126,7 +158,7 @@ class DashboardPage extends ConsumerWidget {
           : (!isBuy && signal.entry != 0)
               ? Colors.red
               : Colors.grey,
-      margin: const EdgeInsets.all(12),
+      //margin: const EdgeInsets.all(12),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -166,23 +198,11 @@ class DashboardPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('RR:', style: const TextStyle(color: Colors.white)),
-                  Text('1:${signal.rr.toStringAsFixed(0)}',
+                  Text('1:${signal.rr.abs().toStringAsFixed(0)}',
                       style: const TextStyle(color: Colors.white)),
                 ],
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(vertical: 3),
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //     children: [
-            //       Text('Confidence', style: const TextStyle(color: Colors.white)),
-            //       Text(
-            //           "${(signal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)} %",
-            //           style: const TextStyle(color: Colors.white)),
-            //     ],
-            //   ),
-            // ),
           ],
         ),
       ),

@@ -168,7 +168,7 @@ class TradeHistoryNotifier extends StateNotifier<List<Trade>> {
         }
       return trade.copyWith(
         exitPrice: exitPrice,
-        exitTime: DateTime.now(),
+        exitTime: DateTime.now().toUtc(),
         pnl: pnl,
         isWin: hitTP,
         isOpen: false,

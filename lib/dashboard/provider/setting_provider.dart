@@ -73,7 +73,12 @@ class SettingsNotifier extends AsyncNotifier<SettingState> {
       if (confirm != true) {
         enabled = true; // User canceled, keep notifications enabled
       } else {
-        enabled = false; // User confirmed, disable notifications
+        PermissionStatus status = await Permission.notification.status;
+        if (!status.isGranted) {
+          enabled = false; // User confirmed, disable notifications
+        } else {
+          enabled = true; // User confirmed but permission still granted, keep enabled
+        }
       }
     }
     await prefs.setBool('notificationsEnabled', enabled);

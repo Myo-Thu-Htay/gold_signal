@@ -97,16 +97,23 @@ class _SignalHistoryPageState extends ConsumerState<SignalHistoryPage> {
                           },
                         );
                       },
-                      leading: Icon(
-                        signal.isBuy
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward,
-                        color: signal.isBuy ? Colors.green : Colors.red,
+                      leading: CircleAvatar(
+                        backgroundColor:
+                            signal.isBuy ? Colors.green : Colors.red,
+                        child: Icon(
+                          signal.isBuy
+                              ? Icons.arrow_outward
+                              : Icons.arrow_downward,
+                          color: Colors.white,
+                        ),
                       ),
                       title: Text(
-                          '${signal.status.toString().split('.').last.toUpperCase()} - ${signal.isBuy ? 'BUY' : 'SELL'}'),
+                        signal.reason.toString(),
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
                       subtitle: Text(
-                        'Entry: ${signal.entry.toStringAsFixed(2)} | Confidence: ${(signal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%',
+                        'Type: ${signal.isBuy ? 'BUY' : 'SELL'} | Confidence: ${(signal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%',
                         style: TextStyle(fontSize: 14),
                       ),
                       trailing: Text(

@@ -215,7 +215,14 @@ class SignalService {
     if (h1Bull && pullBack && rsiBull && isBullishBreak && isBuyReject) {
       if (kDebugMode) {
         print(
-            'Conditions met for BUY signal: H1 Bullish, Pullback to EMA50, RSI Bullish, Bullish Break, Buy Rejection');
+            'Conditions met for Strong BUY signal: H1 Bullish, Pullback to EMA50, RSI Bullish, Bullish Break, Buy Rejection');
+      }
+      return 'Strong Buy';
+    }
+    if (h1Bull && rsiBull && isBuyReject) {
+      if (kDebugMode) {
+        print(
+            'Conditions met for BUY signal: H1 Bullish,RSI Bullish,Buy Rejection');
       }
       return 'Buy';
     }
@@ -224,7 +231,19 @@ class SignalService {
         print(
             'Conditions met for SELL signal: H1 Bearish, Pullback to EMA50, RSI Bearish, Bearish Break, Sell Rejection');
       }
+      return 'Strong Sell';
+    }
+    if (h1Bear && rsiBear && isSellReject) {
+      if (kDebugMode) {
+        print(
+            'Conditions met for SELL signal: H1 Bearish,RSI Bearish,Sell Rejection');
+      }
       return 'Sell';
+    }
+    if (kDebugMode) {
+      print('No conditions met, returning HOLD signal. \n'
+          'H1 Bullish: $h1Bull, H1 Bearish: $h1Bear, Pullback: $pullBack, RSI Bullish: $rsiBull, RSI Bearish: $rsiBear, '
+          'Bullish Break: $isBullishBreak, Buy Rejection: $isBuyReject, Sell Rejection: $isSellReject');
     }
     return 'Hold';
   }

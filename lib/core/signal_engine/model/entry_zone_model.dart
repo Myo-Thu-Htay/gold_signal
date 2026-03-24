@@ -17,3 +17,22 @@ class EntryZone {
         (json['max'] as num).toDouble(), json['isBuy'] as bool);
   }
 }
+
+class EntryResult {
+  final bool isValid;
+  final bool isBuy;
+  final double entry;
+  final double sl;
+  final double tp;
+  final String reason;
+  final EntryZone? zone;
+  EntryResult({
+    required this.isValid,
+    required this.isBuy,
+    required this.entry,
+    required this.sl,
+    required this.tp,
+    required this.reason,
+    this.zone,
+  });
+}

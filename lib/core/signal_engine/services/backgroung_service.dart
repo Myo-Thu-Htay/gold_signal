@@ -73,7 +73,9 @@ void onStart(ServiceInstance service) async {
           }
           final exits = prefs.getString('signal_ids');
           if (newId != exits) {
-             if(validSignal.entry == 0 || validSignal.stopLoss == 0 || validSignal.takeProfit == 0){
+            if (validSignal.entry == 0 ||
+                validSignal.stopLoss == 0 ||
+                validSignal.takeProfit == 0) {
               if (kDebugMode) {
                 print('Invalid signal data, skipping notification.');
               }
@@ -91,9 +93,11 @@ void onStart(ServiceInstance service) async {
           prefs.setString('signal_ids', newId); // Update the stored signal ID
           if (isOn) {
             NotificationService.showNotification(
-                title: "New ${signal.isBuy ? 'Buy' : 'Sell'} Signal",
+                title: signal.reason != null
+                    ? "${signal.reason}"
+                    : "New Signal Detected",
                 body:
-                    "Entry: ${signal.entry.toStringAsFixed(2)}, SL: ${signal.stopLoss.toStringAsFixed(2)}, TP: ${signal.takeProfit.toStringAsFixed(2)},Lot: ${signal.lotSize.toStringAsFixed(2)},Confidence: ${(signal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%, RR: 1:${((signal.takeProfit - signal.entry).abs() / (signal.entry - signal.stopLoss).abs()).toStringAsFixed(0)}");
+                    "${signal.isBuy ? 'Buy' : 'Sell'} at Entry: ${signal.entry.toStringAsFixed(2)}, SL: ${signal.stopLoss.toStringAsFixed(2)}, TP: ${signal.takeProfit.toStringAsFixed(2)},Lot: ${signal.lotSize.toStringAsFixed(2)},Confidence: ${(signal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%, RR: 1:${((signal.takeProfit - signal.entry).abs() / (signal.entry - signal.stopLoss).abs()).toStringAsFixed(0)}");
           }
         }
       } else {
@@ -101,7 +105,9 @@ void onStart(ServiceInstance service) async {
         if (validSignal.status.toString() != SignalStatus.active.toString()) {
           final newStatus = validSignal.status.toString();
           if (lastStatus != newStatus) {
-            if(validSignal.entry == 0 || validSignal.stopLoss == 0 || validSignal.takeProfit == 0){
+            if (validSignal.entry == 0 ||
+                validSignal.stopLoss == 0 ||
+                validSignal.takeProfit == 0) {
               if (kDebugMode) {
                 print('Invalid signal data, skipping notification.');
               }
@@ -111,9 +117,9 @@ void onStart(ServiceInstance service) async {
             if (isOn) {
               NotificationService.showNotification(
                   title:
-                      "Signal ${validSignal.status.toString().split('.').last.toUpperCase()}",
+                      "${signal.reason} ${validSignal.status.toString().split('.').last.toUpperCase()}",
                   body:
-                      "Status: ${validSignal.status.toString().split('.').last.toUpperCase()} ${validSignal.isBuy ? 'BUY' : 'SELL'} at ${validSignal.entry.toStringAsFixed(2)} with confidence ${(validSignal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%");
+                      "${validSignal.isBuy ? 'BUY' : 'SELL'} at ${validSignal.entry.toStringAsFixed(2)} with confidence ${(validSignal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%");
             }
             await prefs.setString('latest_signal_status',
                 newStatus); // Update the stored signal status
@@ -123,7 +129,7 @@ void onStart(ServiceInstance service) async {
       }
       if (kDebugMode) {
         print(
-            'Signal status: ${validSignal.status.toString().split('.').last.toUpperCase()} ${validSignal.isBuy ? 'BUY' : 'SELL'} at  Entry: ${validSignal.entry.toStringAsFixed(2)}  SL: ${validSignal.stopLoss.toStringAsFixed(2)} TP: ${validSignal.takeProfit.toStringAsFixed(2)} Lot: ${validSignal.lotSize.toStringAsFixed(2)} with confidence ${(validSignal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%');
+            'Signal status: ${validSignal.status.toString().split('.').last.toUpperCase()} reason: ${validSignal.reason} ${validSignal.isBuy ? 'BUY' : 'SELL'} at  Entry: ${validSignal.entry.toStringAsFixed(2)}  SL: ${validSignal.stopLoss.toStringAsFixed(2)} TP: ${validSignal.takeProfit.toStringAsFixed(2)} Lot: ${validSignal.lotSize.toStringAsFixed(2)} with confidence ${(validSignal.confidence.abs() / 20 * 100).clamp(0, 100).toStringAsFixed(0)}%');
       }
     } catch (e, stackTrace) {
       if (kDebugMode) {
